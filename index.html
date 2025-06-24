@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maestro de la Ciberseguridad</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #c7d2fe; /* Light Indigo 200 background for a more vibrant feel */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 0.5rem; /* Reduced padding for overall compactness */
+        }
+        .game-container {
+            background-color: #e0f2fe; /* Light Blue 50 - new background for the game content area */
+            border-radius: 1.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 1rem; /* Further reduced padding */
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem; /* Further reduced gap */
+            border: 2px solid #6366f1;
+        }
+        .btn {
+            padding: 0.4rem 0.8rem; /* Further reduced padding */
+            border-radius: 0.75rem;
+            font-weight: 600;
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem; /* Further reduced gap */
+            border: none;
+            font-size: 0.8rem; /* Further reduced font size */
+        }
+        .btn-primary {
+            background-color: #3b82f6; /* Blue 500 */
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb; /* Blue 600 */
+            transform: translateY(-2px);
+        }
+        .btn-option {
+            background-color: #bfdbfe; /* Blue 200 */
+            color: #1e3a8a; /* Blue 900 */
+            text-align: left;
+            width: 100%;
+            margin-bottom: 0.3rem; /* Further reduced margin */
+            border: 1px solid #93c5fd; /* Blue 300 */
+            padding: 0.5rem 0.7rem; /* Adjusted padding */
+            font-size: 0.9rem; /* Further reduced font size for options */
+        }
+        .btn-option:hover:not(.selected):not(.correct):not(.incorrect):not(.disabled) {
+            background-color: #60a5fa; /* Blue 400 */
+            transform: translateY(-2px);
+        }
+        .btn-option.selected {
+            background-color: #3b82f6; /* Blue 500 */
+            border-color: #1d4ed8; /* Blue 700 */
+            color: white;
+            transform: translateY(-2px);
+        }
+        .btn-option.correct {
+            background-color: #a7f3d0; /* Emerald 200 */
+            border-color: #34d399; /* Emerald 500 */
+            color: #065f46; /* Emerald 900 */
+        }
+        .btn-option.incorrect {
+            background-color: #fecaca; /* Rose 200 */
+            border-color: #f43f5e; /* Rose 500 */
+            color: #881337; /* Rose 900 */
+        }
+        .btn-option.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .feedback-message {
+            margin-top: 0.5rem; /* Further reduced margin */
+            padding: 0.5rem; /* Further reduced padding */
+            border-radius: 0.75rem;
+            font-weight: 500;
+            text-align: left;
+            font-size: 0.9rem; /* Adjusted font size */
+        }
+        .feedback-correct {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #34d399;
+        }
+        .feedback-incorrect {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+        .progress-bar-container {
+            background-color: #e5e7eb;
+            border-radius: 0.5rem;
+            height: 0.6rem; /* Slightly thinner */
+            overflow: hidden;
+            margin-top: 0.5rem; /* Further reduced margin */
+        }
+        .progress-bar {
+            background-color: #3b82f6;
+            height: 100%;
+            width: 0%;
+            border-radius: 0.5rem;
+            transition: width 0.5s ease-in-out;
+        }
+        .timer-bar-container {
+            background-color: #e5e7eb;
+            border-radius: 0.5rem;
+            height: 0.6rem; /* Slightly thinner */
+            overflow: hidden;
+            margin-top: 0.3rem; /* Further reduced margin */
+        }
+        .timer-bar {
+            background-color: #84cc16;
+            height: 100%;
+            width: 100%;
+            border-radius: 0.5rem;
+            transition: width 1s linear;
+        }
+        .siren-effect {
+            animation: sirenPulse 0.5s infinite alternate;
+            background-color: #f43f5e !important;
+        }
+        @keyframes sirenPulse {
+            from { background-color: #fecaca; }
+            to { background-color: #f43f5e; }
+        }
+
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 1.2rem; /* Further reduced padding */
+            border-radius: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            max-width: 550px; /* Slightly reduced max-width */
+            width: 90%;
+            text-align: center;
+            max-height: 95vh; /* Increased max-height for modal content */
+            overflow-y: auto;
+        }
+        .modal-header {
+            font-size: 1.3rem; /* Further reduced font size */
+            font-weight: bold;
+            margin-bottom: 0.7rem; /* Further reduced margin */
+            color: #1f2937;
+        }
+        .modal-body {
+            margin-bottom: 1rem; /* Further reduced margin */
+            color: #4b5563;
+            text-align: left;
+            font-size: 0.9rem; /* Further reduced font size */
+        }
+        .modal-footer button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem; /* Further reduced padding */
+            border-radius: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .modal-footer button:hover {
+            background-color: #2563eb;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Input and button for Advisor */
+        .advisor-input-container {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem; /* Further reduced gap */
+            margin-top: 0.7rem; /* Further reduced margin */
+        }
+        .advisor-input-container textarea {
+            width: 100%;
+            padding: 0.5rem; /* Further reduced padding */
+            border-radius: 0.5rem;
+            border: 1px solid #d1d5db;
+            resize: vertical;
+            min-height: 60px; /* Further reduced min-height */
+            font-size: 0.85rem;
+        }
+        .advisor-response {
+            margin-top: 0.7rem; /* Further reduced margin */
+            padding: 0.7rem; /* Further reduced padding */
+            background-color: #f3f4f6;
+            border-radius: 0.75rem;
+            text-align: left;
+            white-space: pre-wrap;
+            font-size: 0.85rem;
+        }
+        /* Adjust font sizes for main game screen elements */
+        #question-text {
+            font-size: 1.6rem; /* Further reduced for compactness */
+            margin-top: 0.8rem; /* Further reduced margin */
+            margin-bottom: 0.8rem; /* Further reduced margin */
+        }
+        .flex.justify-between.items-center.mb-4 {
+            margin-bottom: 0.6rem; /* Further reduced margin */
+        }
+        .text-xl.font-semibold.text-gray-800 {
+            font-size: 1rem; /* Further reduced score/lives */
+        }
+        .text-sm.text-gray-600.mt-2 {
+            margin-top: 0.3rem; /* Further reduced margin */
+            font-size: 0.8rem; /* Further reduced font size */
+        }
+        .flex.flex-wrap.justify-center.md\:justify-between.items-center.mt-6.gap-3 {
+            margin-top: 0.8rem; /* Further reduced margin */
+            gap: 0.4rem; /* Further reduced gap */
+        }
+        #welcome-screen .text-lg, #welcome-screen .text-md {
+            font-size: 0.9rem; /* Further reduced text on welcome screen */
+        }
+        #welcome-screen ul {
+            margin-top: 0.4rem; /* Further reduced margin */
+        }
+        #end-screen .text-4xl {
+            font-size: 2rem; /* Further reduced end screen title */
+        }
+        #end-screen .text-xl {
+            font-size: 1rem; /* Further reduced end screen score */
+        }
+        #end-screen .text-lg {
+            font-size: 0.9rem; /* Further reduced end screen message */
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <!-- Welcome Screen -->
+        <div id="welcome-screen" class="p-6">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">Maestro de la Ciberseguridad</h1>
+            <p class="text-lg text-gray-700 mb-6">¡Bienvenido! Este juego te ayudará a aprender sobre ciberseguridad de una forma divertida y práctica para protegerte a ti mismo y a la organización.</p>
+            <p class="text-md text-gray-600 mb-6">
+                <strong>Instrucciones:</strong>
+                <ul class="list-disc list-inside text-left mx-auto max-w-md">
+                    <li>Selecciona una opción haciendo clic en ella.</li>
+                    <li>Recibirás puntos por cada respuesta correcta.</li>
+                    <li>Tienes 3 vidas. Si respondes incorrectamente, perderás una vida.</li>
+                    <li>Cada pregunta tiene un temporizador de 30 segundos. ¡Estate atento a la sirena en los últimos 10 segundos!</li>
+                    <li>Puedes usar el comodín "50/50" una vez por partida para eliminar dos opciones incorrectas.</li>
+                    <li>¡Usa "Llamada a un Experto" para obtener una pista de Gemini!</li>
+                    <li>¡Usa "Preguntar al Público" para ver qué opina la mayoría!</li>
+                    <li>¡Y al final, genera nuevas preguntas, simula escenarios, recibe una ruta de aprendizaje personalizada o consulta a tu Asesor de Ciberseguridad Personal con Gemini para seguir aprendiendo!</li>
+                </ul>
+            </p>
+            <button id="start-game-btn" class="btn btn-primary">Comenzar Juego</button>
+        </div>
+
+        <!-- Game Screen -->
+        <div id="game-screen" class="hidden p-6">
+            <div class="flex justify-between items-center mb-4">
+                <span class="text-xl font-semibold text-gray-800">Puntuación: <span id="score">0</span></span>
+                <span class="text-xl font-semibold text-gray-800">Vidas: <span id="lives">3</span></span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <p class="text-sm text-gray-600 mt-2">Pregunta <span id="current-question-number">1</span> de <span id="total-questions">X</span></p>
+
+            <div class="timer-bar-container mt-4">
+                <div id="timer-bar" class="timer-bar"></div>
+            </div>
+            <p class="text-sm text-gray-600 mt-2">Tiempo restante: <span id="timer-display">30</span>s</p>
+
+
+            <h2 id="question-text" class="text-2xl font-bold text-gray-900 my-6 text-left"></h2>
+            <div id="options-container" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- Options will be dynamically loaded here -->
+            </div>
+            <div id="feedback-area" class="feedback-message hidden"></div>
+            <div class="flex flex-wrap justify-center md:justify-between items-center mt-6 gap-3">
+                <button id="fifty-fifty-btn" class="btn btn-primary bg-purple-600 hover:bg-purple-700">50/50 (<span id="fifty-fifty-count">1</span>)</button>
+                <button id="call-expert-btn" class="btn btn-primary bg-red-500 hover:bg-red-600">Llamada a un Experto ✨ (<span id="expert-count">1</span>)</button>
+                <button id="ask-audience-btn" class="btn btn-primary bg-cyan-500 hover:bg-cyan-600">Preguntar al Público ✨ (<span id="audience-count">1</span>)</button>
+                <button id="gemini-explanation-btn" class="btn btn-primary bg-emerald-600 hover:bg-emerald-700 hidden">Explicación Extendida ✨</button>
+                <button id="next-question-btn" class="btn btn-primary hidden">Siguiente Pregunta</button>
+            </div>
+        </div>
+
+        <!-- End Game Screen -->
+        <div id="end-screen" class="p-6">
+            <h2 class="text-4xl font-bold text-gray-900 mb-4">¡Juego Terminado!</h2>
+            <p class="text-xl text-gray-700 mb-6">Tu puntuación final es: <span id="final-score" class="font-bold text-blue-600">0</span></p>
+            <p id="end-message" class="text-lg text-gray-600 mb-8"></p>
+            <div class="flex flex-col md:flex-row justify-center gap-4">
+                <button id="restart-game-btn" class="btn btn-primary">Jugar de Nuevo</button>
+                <button id="generate-new-question-btn" class="btn btn-primary bg-blue-600 hover:bg-blue-700">Generar Pregunta Adicional ✨</button>
+                <button id="scenario-simulator-btn" class="btn btn-primary bg-orange-600 hover:bg-orange-700">Simulador de Escenario ✨</button>
+                <button id="learning-path-btn" class="btn btn-primary bg-teal-600 hover:bg-teal-700">Sugerir Ruta de Aprendizaje ✨</button>
+                <button id="cyber-advisor-btn" class="btn btn-primary bg-gray-700 hover:bg-gray-800">Asesor de Ciberseguridad Personal ✨</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Modal for Alerts and Explanations -->
+    <div id="custom-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div id="modal-header" class="modal-header"></div>
+            <div id="modal-body" class="modal-body"></div>
+            <div id="modal-loading" class="loading-spinner hidden"></div>
+            <div class="modal-footer">
+                <button id="modal-close-btn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advisor Modal -->
+    <div id="advisor-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <div class="modal-header">Asesor de Ciberseguridad Personal ✨</div>
+            <div class="modal-body">
+                <p class="mb-2">Haz tu pregunta sobre ciberseguridad:</p>
+                <div class="advisor-input-container">
+                    <textarea id="advisor-question-input" placeholder="Ej: ¿Qué es el phishing y cómo puedo evitarlo?"></textarea>
+                    <button id="ask-advisor-btn" class="btn btn-primary">Preguntar</button>
+                </div>
+                <div id="advisor-response-area" class="advisor-response hidden"></div>
+                <div id="advisor-loading" class="loading-spinner hidden mt-4"></div>
+            </div>
+            <div class="modal-footer">
+                <button id="advisor-close-btn">Cerrar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Array de preguntas, opciones, respuestas correctas y explicaciones
+        const questions = [
+            {
+                question: "¿Qué porcentaje aproximado de los ciberataques están dirigidos al factor humano?",
+                options: ["A) 20%", "B) 50%", "C) 80%", "D) 100%"],
+                correctAnswerIndex: 2,
+                explanation: "Aproximadamente el 80% de los ciberataques explotan el factor humano, lo que subraya la importancia de la concientización en ciberseguridad."
+            },
+            {
+                question: "¿Cuál es una de las principales causas de incidentes de seguridad que se materializan en las empresas debido a errores humanos?",
+                options: ["A) Falta de herramientas técnicas avanzadas.", "B) Desconocimiento sobre cómo usar correctamente el correo electrónico o aplicaciones.", "C) Ataques dirigidos exclusivamente a la infraestructura.", "D) Exceso de políticas y procedimientos."],
+                correctAnswerIndex: 1,
+                explanation: "El desconocimiento sobre el uso correcto de herramientas digitales como el correo electrónico o aplicaciones es una causa común de incidentes de seguridad."
+            },
+            {
+                question: "Si recibe un correo electrónico sospechoso que parece ser de su banco o una empresa conocida pidiendo información personal o que haga clic en un enlace, ¿cómo debería responder? ",
+                options: ["A) Hacer clic inmediatamente en el enlace para verificar.", "B) Responder al correo pidiendo más información.", "C) Eliminar el correo electrónico y, si es posible, reportarlo según la política de su empresa.", "D) Reenviar el correo a todos sus contactos para advertirles."],
+                correctAnswerIndex: 2,
+                explanation: "Ante un correo sospechoso, lo mejor es eliminarlo y reportarlo. Nunca hagas clic en enlaces ni respondas a solicitudes de información personal."
+            },
+            {
+                question: "¿Qué es la Ingeniería Social en el contexto de la ciberseguridad?",
+                options: ["A) El diseño de redes sociales seguras.", "B) El uso de tecnología avanzada para proteger datos.", "C) Técnicas que manipulan a las personas para que realicen acciones o revelen información confidencial.", "D) Un tipo de software antivirus."],
+                correctAnswerIndex: 2,
+                explanation: "La Ingeniería Social son técnicas psicológicas para manipular a las personas y obtener información confidencial o que realicen acciones perjudiciales."
+            },
+            {
+                question: "¿Cuál de los siguientes es un tema de concientización en ciberseguridad que a menudo se considera de alta importancia?",
+                options: ["A) Gestión de servidores.", "B) Desarrollo seguro de software.", "C) Ingeniería Social (incluyendo phishing).", "D) Configuración de firewalls."],
+                correctAnswerIndex: 2,
+                explanation: "La Ingeniería Social, incluyendo el phishing, es un tema crucial en la concientización ya que ataca directamente al usuario."
+            },
+            {
+                question: "¿Por qué es importante que los empleados tengan conocimiento de ciberseguridad?",
+                options: ["A) Para que puedan instalar software de seguridad.", "B) Para reducir la ocurrencia de incidentes de seguridad.", "C) Para que puedan configurar la red de la empresa.", "D) Para obtener certificaciones técnicas."],
+                correctAnswerIndex: 1,
+                explanation: "El conocimiento en ciberseguridad empodera a los empleados para identificar y evitar amenazas, reduciendo los incidentes de seguridad."
+            },
+            {
+                question: "¿Cuál es una buena práctica para crear una contraseña segura?",
+                options: ["A) Usar su nombre o fecha de nacimiento.", "B) Usar una secuencia numérica simple como '123456'.", "C) Combinar letras mayúsculas y minúsculas, números y símbolos, y que sea única para cada cuenta importante.", "D) Anotar la contraseña cerca del monitor."],
+                correctAnswerIndex: 2,
+                explanation: "Una contraseña segura es una combinación compleja de caracteres y es única para cada cuenta, lo que minimiza el riesgo si una cuenta es comprometida."
+            },
+            {
+                question: "¿Qué es el Ransomware?",
+                options: ["A) Un tipo de software que acelera su computadora.", "B) Un ataque que bloquea el acceso a sus archivos o sistema y exige un pago para liberarlos.", "C) Un sistema para gestionar contraseñas.", "D) Un programa para hacer copias de seguridad."],
+                correctAnswerIndex: 1,
+                explanation: "El Ransomware es un tipo de malware que cifra tus archivos o bloquea tu sistema, exigiendo un rescate para restaurar el acceso."
+            },
+            {
+                question: "¿Qué significa la Autenticación Multifactor (MFA)?",
+                options: ["A) Usar una contraseña muy larga.", "B) Iniciar sesión con un solo método de verificación (ej. solo contraseña).", "C) Requerir dos o más métodos de verificación independientes para acceder a una cuenta o sistema.", "D) Compartir su contraseña con varios compañeros."],
+                correctAnswerIndex: 2,
+                explanation: "La MFA añade una capa de seguridad extra, requiriendo al menos dos formas de verificación (ej. contraseña y código del móvil) para acceder a una cuenta."
+            },
+            {
+                question: "Si encuentra un dispositivo USB desconocido (pendrive) en la oficina, ¿qué debería hacer?",
+                options: ["A) Conectarlo a su computadora para ver qué contiene.", "B) Entregarlo al departamento de TI o Seguridad.", "C) Guardarlo para uso personal.", "D) Dejarlo donde lo encontró."],
+                correctAnswerIndex: 1,
+                explanation: "Los USB desconocidos pueden contener malware. Siempre entrégalos al departamento de TI o seguridad para su revisión segura."
+            },
+            {
+                question: "¿Cuál es el propósito de una política de seguridad de la información en una empresa?",
+                options: ["A) Solo para complicar el trabajo de los empleados.", "B) Establecer reglas y guías para proteger la información y los sistemas.", "C) Definir quién es responsable de la seguridad física.", "D) Dictar qué software pueden instalar los empleados sin permiso."],
+                correctAnswerIndex: 1,
+                explanation: "Las políticas de seguridad establecen las normas para proteger la información y los sistemas de la empresa, guiando el comportamiento de los empleados."
+            },
+            {
+                question: "Si sospecha que ha ocurrido un incidente de ciberseguridad (por ejemplo, un correo sospechoso, un archivo extraño), ¿qué debería hacer inmediatamente?",
+                options: ["A) Intentar solucionarlo usted mismo.", "B) No hacer nada y esperar a ver qué pasa.", "C) Notificar al departamento de TI o al equipo de seguridad de la empresa.", "D) Apagar su computadora y desconectarla de la red."],
+                correctAnswerIndex: 2,
+                explanation: "Reportar inmediatamente cualquier sospecha de incidente de ciberseguridad al equipo de TI o seguridad es crucial para una respuesta rápida."
+            },
+            {
+                question: "¿Por qué las campañas de concientización en ciberseguridad a veces encuentran resistencia en el personal?",
+                options: ["A) Porque las personas ya saben todo sobre ciberseguridad.", "B) Porque implica cambiar hábitos de trabajo o uso de aplicaciones.", "C) Porque son demasiado cortas e informales.", "D) Porque solo se enfocan en los beneficios técnicos."],
+                correctAnswerIndex: 1,
+                explanation: "La resistencia a menudo surge porque la concientización requiere cambiar hábitos arraigados en el uso de la tecnología."
+            },
+            {
+                question: "¿Es necesario capacitar en ciberseguridad a las personas que trabajan en el sector público?",
+                options: ["A) No, solo es relevante en el sector privado.", "B) Sí, todas las personas que usan tecnología deben ser capacitadas.", "C) Solo si manejan información clasificada.", "D) Solo el personal de TI."],
+                correctAnswerIndex: 1,
+                explanation: "Toda persona que usa tecnología, independientemente del sector, debe ser capacitada en ciberseguridad para protegerse a sí misma y a la organización."
+            },
+            {
+                question: "¿Cuál es la parte 'menos costosa' de la ciberseguridad, pero que puede prevenir el mayor número de ciberataques?",
+                options: ["A) La implementación de firewalls avanzados.", "B) La contratación de un SOC 24/7.", "C) Los programas de concientización y capacitación.", "D) Las pruebas de penetración."],
+                correctAnswerIndex: 2,
+                explanation: "Los programas de concientización y capacitación son una inversión costo-efectiva que previene muchos ciberataques al fortalecer el eslabón humano."
+            },
+            {
+                question: "¿Qué es un simulacro de phishing?",
+                options: ["A) Un juego online sin propósito educativo.", "B) Un ataque de phishing real lanzado por criminales.", "C) Una prueba controlada enviada por la empresa para evaluar la capacidad de los empleados para identificar correos electrónicos fraudulentos.", "D) Una reunión para discutir ejemplos de phishing."],
+                correctAnswerIndex: 2,
+                explanation: "Un simulacro de phishing es una prueba segura para evaluar y mejorar la capacidad de los empleados para reconocer y reportar correos fraudulentos."
+            },
+            {
+                question: "¿Qué se recomienda hacer después de realizar un simulacro de phishing?",
+                options: ["A) Despedir a los empleados que hicieron clic.", "B) Publicar los nombres de quienes fallaron.", "C) Proporcionar retroalimentación y capacitación adicional a los participantes.", "D) Ignorar los resultados."],
+                correctAnswerIndex: 2,
+                explanation: "Después de un simulacro, la retroalimentación y capacitación adicional son clave para reforzar el aprendizaje, no para castigar."
+            },
+            {
+                question: "¿Por qué es arriesgado publicar información innecesaria o peligrosa en redes sociales?",
+                options: ["A) Puede aburrir a sus amigos.", "B) Los atacantes pueden usar esa información para ataques de ingeniería social dirigidos.", "C) Consume mucho tiempo.", "D) No es un riesgo de seguridad, solo de privacidad."],
+                correctAnswerIndex: 1,
+                explanation: "La información publicada en redes sociales puede ser usada por atacantes para crear ataques de ingeniería social más convincentes y dirigidos."
+            },
+            {
+                question: "¿Cuál es uno de los desafíos al impartir capacitación en ciberseguridad a los empleados?",
+                options: ["A) Que los empleados ya tienen un conocimiento muy avanzado.", "B) Que los empleados perciben la capacitación como difícil, aburrida o irrelevante.", "C) Que no hay suficientes temas para cubrir.", "D) Que es demasiado económica de implementar."],
+                correctAnswerIndex: 1,
+                explanation: "Un desafío común es la percepción de que la capacitación es aburrida o irrelevante, lo que requiere enfoques más atractivos e interactivos."
+            },
+            {
+                question: "Cuando la información técnica de ciberseguridad se presenta a personal no técnico, ¿cómo debería adaptarse?",
+                options: ["A) Usar más jerga técnica para que aprendan.", "B) Ser presentada de manera sencilla y fácil de comprender.", "C) Excluir al personal no técnico.", "D) Ser lo más larga y detallada posible."],
+                correctAnswerIndex: 1,
+                explanation: "La información debe ser sencilla y fácil de entender para el personal no técnico, evitando la jerga compleja para asegurar su comprensión."
+            },
+            {
+                question: "Si no está seguro sobre un procedimiento o cómo manejar una situación de seguridad, ¿qué debería hacer según la frase 'Se vale no saber, pero no se vale no preguntar'?",
+                options: ["A) Intentar adivinar la respuesta.", "B) Ocultar su duda.", "C) Buscar a la persona o recurso adecuado en la empresa para preguntar.", "D) Esperar que alguien más lo resuelva."],
+                correctAnswerIndex: 2,
+                explanation: "Siempre es mejor preguntar y buscar ayuda del personal o recursos adecuados si tienes dudas sobre un procedimiento de seguridad."
+            },
+            {
+                question: "¿Por qué la motivación es importante en los programas de concientización en ciberseguridad?",
+                options: ["A) Solo para hacer el entrenamiento más divertido.", "B) Ayuda a que los usuarios se involuven y sigan adquiriendo habilidades.", "C) Es un requisito de cumplimiento.", "D) Reduce la necesidad de tener buenas contraseñas."],
+                correctAnswerIndex: 1,
+                explanation: "La motivación fomenta la participación y el compromiso de los usuarios, lo que es vital para la adquisición continua de habilidades en ciberseguridad."
+            },
+            {
+                question: "¿Es suficiente confiar solo en herramientas tecnológicas como antivirus y firewalls para proteger una organización de todos los ciberataques?",
+                options: ["A) Sí, las herramientas lo hacen todo.", "B) No, la seguridad es una suma de herramientas, procedimientos y concientización de las personas.", "C) Sí, si las herramientas son muy caras.", "D) No, pero solo la concientización es suficiente."],
+                correctAnswerIndex: 1,
+                explanation: "La seguridad es un enfoque integral que combina tecnología, procesos y, fundamentalmente, la concientización y el comportamiento seguro de las personas."
+            },
+            {
+                question: "¿Por qué es un error grave no capacitar al personal en ciberseguridad?",
+                options: ["A) No permite que el departamento de TI se relaje.", "B) La gente es la que interactúa directamente con los sistemas y puede cometer errores que causen incidentes.", "C) Causa que las computadoras funcionen más lento.", "D) Impide que la empresa compre nuevo software."],
+                correctAnswerIndex: 1,
+                explanation: "El personal es el eslabón más vulnerable; sin capacitación, sus errores pueden ser la causa principal de incidentes de seguridad."
+            },
+            {
+                question: "¿Cómo se puede medir el nivel de conocimiento de ciberseguridad de los empleados como punto de partida para un programa de concientización?",
+                options: ["A) Asumiendo que todos tienen el mismo nivel.", "B) Realizando encuestas, cuestionarios o exámenes iniciales.", "C) Esperando a que ocurra un incidente.", "D) Observando quién usa la computadora más rápido."],
+                correctAnswerIndex: 1,
+                explanation: "Las encuestas o exámenes iniciales son clave para entender el nivel de conocimiento actual y adaptar la capacitación a las necesidades reales."
+            },
+            {
+                question: "¿Cuál es la duración ideal para videos informativos de concientización que se envían a los empleados?",
+                options: ["A) Más de 30 minutos.", "B) Alrededor de 15 minutos.", "C) Muy cortos, idealmente no más de 2 minutos.", "D) La duración no importa, solo el contenido."],
+                correctAnswerIndex: 2,
+                explanation: "Los videos de concientización deben ser muy cortos, idealmente de no más de 2 minutos, para mantener la atención y facilitar la retención de información."
+            },
+            {
+                question: "¿Qué es Vishing?",
+                options: ["A) Phishing a través de mensajes de texto.", "B) Phishing a través de llamadas telefónicas.", "C) Phishing a través de redes sociales.", "D) Phishing a través de correos electrónicos."],
+                correctAnswerIndex: 1,
+                explanation: "Vishing es una forma de ingeniería social que utiliza llamadas telefónicas para engañar a las víctimas y obtener información sensible."
+            },
+            {
+                question: "¿Por qué es importante que la alta dirección apoye y se comprometa con un plan de concientización en ciberseguridad?",
+                options: ["A) Para que puedan recibir la capacitación primero.", "B) Su respaldo es fundamental para la asignación de recursos (humanos, tiempo, presupuesto).", "C) Solo para que sepan que el plan existe.", "D) No es necesario su apoyo, el área de TI puede hacerlo sola."],
+                correctAnswerIndex: 1,
+                explanation: "El apoyo de la alta dirección es crucial para asegurar los recursos necesarios y la prioridad del programa de concientización."
+            },
+            {
+                question: "¿Cuál es un ejemplo de cómo los ciberdelincuentes aprovechan eventos actuales o noticias para sus ataques de phishing?",
+                options: ["A) Enviando correos sobre temas financieros como impuestos o facturas impagas.", "B) Creando programas de capacitación gratuitos.", "C) Organizando conferencias de seguridad.", "D) Desarrollando nuevo software antivirus."],
+                correctAnswerIndex: 0,
+                explanation: "Los ciberdelincuentes a menudo usan temas de actualidad (impuestos, facturas, pandemias) para hacer sus ataques de phishing más creíbles."
+            },
+            {
+                question: "Si recibe un correo electrónico que le pide descargar un archivo adjunto inesperado, ¿qué debería hacer?",
+                options: ["A) Descargarlo inmediatamente para ver qué es.", "B) Preguntar al remitente si es seguro abrirlo.", "C) Tratarlo con sospecha, verificar la legitimidad del remitente y, si es dudoso, no descargarlo y reportarlo.", "D) Reenviarlo a un amigo para que lo revise primero."],
+                correctAnswerIndex: 2,
+                explanation: "Los archivos adjuntos inesperados son una vía común para el malware. Siempre sospecha y verifica la legitimidad antes de descargar o abrir."
+            },
+            {
+                question: "¿Por qué las simulaciones de ataques (como phishing o USB) se recomiendan generalmente después de haber proporcionado capacitación inicial?",
+                options: ["A) Para ver cuántos empleados despiden.", "B) Para poner a prueba si los empleados han comprendido y pueden aplicar los conceptos aprendidos.", "C) Porque son más fáciles de hacer sin capacitación previa.", "D) Para asustar a los empleados."],
+                correctAnswerIndex: 1,
+                explanation: "Las simulaciones son herramientas efectivas para evaluar si la capacitación ha sido efectiva y si los empleados pueden aplicar lo aprendido en situaciones reales."
+            },
+            {
+                question: "¿Qué puede ocurrir si un empleado comete un error de seguridad (por ejemplo, cae en un phishing) no solo a la empresa, sino también a él mismo?",
+                options: ["A) No hay consecuencias personales.", "B) Solo afecta a la empresa.", "C) Puede resultar en la pérdida de información personal o financiera (ej. acceso a cuentas bancarias).", "D) Mejora su conocimiento técnico."],
+                correctAnswerIndex: 2,
+                explanation: "Un error de seguridad puede tener graves consecuencias personales, como la pérdida de datos personales, financieros o el robo de identidad."
+            },
+            {
+                question: "¿Qué tipo de información debería evitar publicar en redes sociales si trabaja en una empresa, ya que podría ser útil para los ciberdelincuentes?",
+                options: ["A) Fotos de sus vacaciones.", "B) Detalles sobre su puesto de trabajo, proyectos internos, o estructura de la empresa.", "C) Comentarios sobre películas.", "D) Enlaces a noticias generales."],
+                correctAnswerIndex: 1,
+                explanation: "Evita publicar detalles sobre tu trabajo o la empresa, ya que esta información puede ser utilizada por atacantes para crear ataques de ingeniería social dirigidos."
+            },
+            {
+                question: "¿Cuál es una señal común de un correo electrónico de phishing?",
+                options: ["A) Está perfectamente redactado y formateado.", "B) Proviene de una dirección de correo electrónico corporativa oficial y verificada.", "C) Contiene errores gramaticales, solicita información personal urgente, o le presiona a hacer clic rápidamente.", "D) Es un boletín informativo al que se ha suscrito."],
+                correctAnswerIndex: 2,
+                explanation: "Los correos de phishing a menudo tienen errores, un tono urgente y solicitan información personal o acciones rápidas."
+            },
+            {
+                question: "¿Por qué no se recomienda usar la misma contraseña para múltiples cuentas online, especialmente las importantes?",
+                options: ["A) Es difícil de recordar.", "B) Si una cuenta es comprometida, todas las cuentas que usan la misma contraseña también están en riesgo.", "C) No es un problema de seguridad.", "D) Ralentiza el inicio de sesión."],
+                correctAnswerIndex: 1,
+                explanation: "Reutilizar contraseñas es un riesgo enorme; si una cuenta es comprometida, todas las demás con la misma contraseña quedan expuestas."
+            },
+            {
+                question: "¿Cuál es la importancia de seguir las políticas de seguridad de la empresa?",
+                options: ["A) Son solo reglas burocráticas sin propósito real.", "B) Ayudan a la empresa y a los empleados a mantener un nivel de seguridad y reducir riesgos.", "C) Están diseñadas para limitar el acceso de los empleados.", "D) Solo afectan al departamento de TI."],
+                correctAnswerIndex: 1,
+                explanation: "Las políticas de seguridad son fundamentales para establecer un marco de protección, reduciendo riesgos y manteniendo la seguridad de la información."
+            },
+            {
+                question: "Si ve una publicación en redes sociales que parece ser de un compañero de trabajo pidiéndole dinero urgentemente, ¿qué debería hacer?",
+                options: ["A) Enviarle el dinero inmediatamente.", "B) Ignorar el mensaje.", "C) Intentar contactar a su compañero por otro medio (teléfono, mensaje directo no relacionado con la solicitud) para verificar si la solicitud es legítima.", "D) Comentar en la publicación pidiendo más detalles."],
+                correctAnswerIndex: 2,
+                explanation: "Verifica siempre la legitimidad de solicitudes urgentes de dinero contactando a la persona por un canal diferente al que recibiste el mensaje."
+            },
+            {
+                question: "¿Cuál es un riesgo de usar redes Wi-Fi públicas (como en cafeterías o aeropuertos) para acceder a información sensible de la empresa o personal?",
+                options: ["A) La conexión puede ser lenta.", "B) Los atacantes podrían interceptar la información que envía o recibe.", "C) Hay demasiados usuarios.", "D) Su dispositivo puede descargarse más rápido."],
+                correctAnswerIndex: 1,
+                explanation: "Las redes Wi-Fi públicas suelen ser inseguras y permiten a los atacantes interceptar tus datos, comprometiendo tu información sensible."
+            },
+            {
+                question: "¿Qué significa el término 'Malware'?",
+                options: ["A) Software que ayuda a organizar archivos.", "B) Software diseñado para dañar, explotar o acceder sin autorización a sistemas o datos.", "C) Un tipo de hardware de red.", "D) Un programa de diseño gráfico."],
+                correctAnswerIndex: 1,
+                explanation: "Malware es un término general para software malicioso diseñado para dañar, explotar o acceder sin permiso a sistemas o datos."
+            },
+            {
+                question: "Si recibe un correo electrónico con un archivo adjunto inesperado y la extensión del archivo parece extraña o desconocida (.exe, .scr, etc.), ¿qué precaución debe tomar? ",
+                options: ["A) Abrirlo inmediatamente ya que es nuevo.", "B) Preguntar a un amigo si sabe qué es.", "C) Ser extremadamente cauteloso, no abrirlo y verificar la legitimidad del correo antes de hacer cualquier cosa.", "D) Cambiarle el nombre al archivo."],
+                correctAnswerIndex: 2,
+                explanation: "Extensiones de archivo inusuales en adjuntos inesperados son una señal de alerta. No los abras y verifica la legitimidad del remitente."
+            },
+            {
+                question: "¿Por qué las empresas invierten en programas de concientización en ciberseguridad para sus empleados?",
+                options: ["A) Es solo una moda pasajera.", "B) Para cumplir con regulaciones y normas, y para fortalecer la seguridad general.", "C) Para que los empleados puedan reparar computadoras.", "D) Para generar más trabajo al departamento de TI."],
+                correctAnswerIndex: 1,
+                explanation: "Las empresas invierten en concientización para cumplir con normativas y fortalecer su postura de seguridad general, ya que el factor humano es clave."
+            },
+            {
+                question: "¿Cómo puede la concientización en ciberseguridad ayudar a los empleados en su vida personal, no solo en el trabajo?",
+                options: ["A) No tiene ninguna relevancia personal.", "B) Las buenas prácticas aprendidas protegen también sus dispositivos personales y finanzas online.", "C) Solo les ayuda a usar el correo electrónico.", "D) Les permite acceder a información restringida."],
+                correctAnswerIndex: 1,
+                explanation: "Las habilidades de ciberseguridad son transferibles y protegen tus dispositivos personales, cuentas online y finanzas en tu vida diaria."
+            },
+            {
+                question: "¿Qué es un riesgo de seguridad común en el teletrabajo (trabajo remoto)?",
+                options: ["A) Usar la misma cafetera que en la oficina.", "B) Conectarse a redes Wi-Fi domésticas inseguras o públicas, o usar dispositivos personales no protegidos para trabajar.", "C) Tener que usar ropa cómoda.", "D) No poder socializar con compañeros."],
+                correctAnswerIndex: 1,
+                explanation: "El teletrabajo introduce riesgos como el uso de redes Wi-Fi inseguras o dispositivos personales sin las protecciones adecuadas."
+            },
+            {
+                question: "Si recibe un mensaje de texto (SMS) que parece ser de una empresa de reparto pidiéndole que haga clic en un enlace para rastrear un paquete que no espera, ¿qué tipo de ataque podría ser? ",
+                options: ["A) Vishing.", "B) Smishing.", "C) Malware.", "D) Ransomware."],
+                correctAnswerIndex: 1,
+                explanation: "Smishing es el término para ataques de phishing que se realizan a través de mensajes de texto (SMS)."
+            },
+            {
+                question: "¿Qué es la protección de datos y por qué es importante para usted como empleado?",
+                options: ["A) Es solo responsabilidad del departamento legal.", "B) Trata sobre cómo resguardar la información personal y de la empresa para evitar su robo, pérdida o acceso no autorizado, lo cual puede tener consecuencias legales, financieras y de reputación.", "C) Solo se aplica a datos confidenciales.", "D) Es un tema solo para técnicos."],
+                correctAnswerIndex: 1,
+                explanation: "La protección de datos es fundamental para salvaguardar la información personal y de la empresa, evitando graves consecuencias legales, financieras y de reputación."
+            },
+            {
+                question: "Si un correo electrónico parece provenir de un colega y le pide realizar una transferencia bancaria urgente, ¿cómo debería proceder?",
+                options: ["A) Realizar la transferencia de inmediato para ayudar.", "B) Asumir que es legítimo si conoce al colega.", "C) Contactar al colega a través de un canal de comunicación previamente verificado (no responder al correo ni usar datos del correo sospechoso) para confirmar la solicitud verbalmente.", "D) Marcar el correo como spam y olvidarlo."],
+                correctAnswerIndex: 2,
+                explanation: "Verifica siempre la legitimidad de solicitudes urgentes de dinero contactando a la persona por un canal diferente al que recibiste el mensaje."
+            },
+            {
+                question: "¿Qué beneficio principal tiene el uso de un gestor de contraseñas seguro?",
+                options: ["A) Hace que las contraseñas sean más cortas.", "B) Permite usar la misma contraseña para todas las cuentas.", "C) Ayuda a crear y almacenar contraseñas únicas y complejas para cada sitio sin tener que recordarlas todas.", "D) Mejora la velocidad de internet."],
+                correctAnswerIndex: 2,
+                explanation: "Un gestor de contraseñas te permite usar contraseñas únicas y complejas para cada cuenta sin tener que memorizarlas, aumentando tu seguridad."
+            },
+            {
+                question: "¿Por qué es importante mantener actualizado el software en sus dispositivos de trabajo y personales?",
+                options: ["A) Para cambiar la apariencia del sistema operativo.", "B) Las actualizaciones a menudo incluyen parches de seguridad para corregir vulnerabilidades conocidas.", "C) Para ocupar más espacio en el disco duro.", "D) Las actualizaciones ralentizan el dispositivo."],
+                correctAnswerIndex: 1,
+                explanation: "Las actualizaciones de software son vitales porque incluyen parches de seguridad que corrigen vulnerabilidades, protegiéndote de nuevos ataques."
+            },
+            {
+                question: "¿Qué debería hacer si recibe un correo electrónico de un remitente desconocido con un enlace o archivo adjunto y le parece mínimamente sospechoso?",
+                options: ["A) Hacer clic por curiosidad.", "B) Preguntar a sus compañeros de trabajo si ellos también lo recibieron.", "C) Proceder con extrema cautela, no hacer clic ni abrir nada, y reportar el correo al equipo de seguridad si su empresa tiene un procedimiento para ello.", "D) Moverlo a la carpeta de spam sin abrirlo."],
+                correctAnswerIndex: 2,
+                explanation: "Ante cualquier sospecha, no hagas clic ni abras nada. Lo más seguro es reportar el correo al equipo de seguridad de tu empresa."
+            },
+            {
+                question: "Cuando una empresa realiza simulacros de phishing, ¿cuál es uno de los objetivos principales?",
+                options: ["A) Identificar a los empleados que merecen un castigo.", "B) Evaluar la efectividad de la capacitación en concientización y la capacidad de respuesta de los usuarios ante correos fraudulentos.", "C) Probar la infraestructura de red de la empresa.", "D) Enviar correos masivos sin razón aparente."],
+                correctAnswerIndex: 1,
+                explanation: "Los simulacros de phishing buscan evaluar y mejorar la capacidad de los empleados para identificar y responder correctamente a los correos fraudulentos."
+            },
+            {
+                question: "Si su departamento de TI le pide activar la autenticación multifactor (MFA) para su cuenta de correo electrónico, ¿por qué es una buena práctica de seguridad?",
+                options: ["A) Hace que sea más difícil para usted iniciar sesión.", "B) Añade una capa extra de seguridad más allá de la contraseña, dificultando el acceso no autorizado incluso si su contraseña es robada.", "C) Solo es necesario si tiene una contraseña débil.", "D) Permite a TI monitorear sus correos."],
+                correctAnswerIndex: 1,
+                explanation: "La MFA es una práctica de seguridad excelente porque añade una capa adicional de protección, haciendo mucho más difícil el acceso no autorizado a tu cuenta."
+            },
+            {
+                question: "¿Qué es el 'factor humano' en ciberseguridad?",
+                options: ["A) Solo el personal de TI.", "B) Las herramientas de seguridad que interactúan con los usuarios.", "C) Las personas (empleados, usuarios) que pueden ser objetivo de ataques o cometer errores de seguridad.", "D) La tecnología utilizada por las personas."],
+                correctAnswerIndex: 2,
+                explanation: "El 'factor humano' se refiere a las personas, que son un objetivo principal para los ciberataques y pueden cometer errores que comprometan la seguridad."
+            },
+            {
+                question: "¿Por qué es importante prestar atención a las recomendaciones de seguridad, incluso si le parecen obvias o tediosas?",
+                options: ["A) Solo para satisfacer al departamento de TI.", "B) Porque las acciones de los usuarios pueden ser explotadas por atacantes, y seguir recomendaciones reduce el riesgo.", "C) No son realmente importantes si tiene un buen antivirus.", "D) Son solo sugerencias, no obligatorias."],
+                correctAnswerIndex: 1,
+                explanation: "Las recomendaciones de seguridad, aunque a veces tediosas, son cruciales porque las acciones de los usuarios son un vector común de ataque. Seguir estas pautas reduce significativamente el riesgo."
+            },
+            {
+                question: "Si trabaja con datos sensibles de clientes o de la empresa, ¿cuál es una responsabilidad clave desde el punto de vista de la ciberseguridad?",
+                options: ["A) Compartirlos libremente si los clientes preguntan.", "B) Asegurarse de que se manejan y almacenan de acuerdo con las políticas de seguridad y privacidad de la empresa.", "C) Guardarlos en su computadora personal para mayor seguridad.", "D) Eliminarlos regularmente para liberar espacio."],
+                correctAnswerIndex: 1,
+                explanation: "Manejar y almacenar datos sensibles de acuerdo con las políticas de seguridad y privacidad es una responsabilidad fundamental para proteger la información de la empresa y los clientes."
+            },
+            {
+                question: "¿Cuál es un buen enfoque para aprender sobre ciberseguridad si los materiales parecen demasiado técnicos?",
+                options: ["A) Abandonar el intento de aprender.", "B) Pedir que le expliquen los conceptos de manera más sencilla o buscar recursos dirigidos a usuarios no técnicos.", "C) Asumir que no necesita saberlo.", "D) Intentar aprender jerga técnica de inmediato."],
+                correctAnswerIndex: 1,
+                explanation: "Si los materiales son muy técnicos, busca explicaciones más sencillas o recursos diseñados para usuarios no técnicos. La clave es la comprensión."
+            }
+        ];
+
+        // Elementos del DOM
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const gameScreen = document.getElementById('game-screen');
+        const endScreen = document.getElementById('end-screen');
+        const startGameBtn = document.getElementById('start-game-btn');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const scoreDisplay = document.getElementById('score');
+        const livesDisplay = document.getElementById('lives');
+        const currentQuestionNumberDisplay = document.getElementById('current-question-number');
+        const totalQuestionsDisplay = document.getElementById('total-questions');
+        const feedbackArea = document.getElementById('feedback-area');
+        const nextQuestionBtn = document.getElementById('next-question-btn');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const endMessageDisplay = document.getElementById('end-message');
+        const restartGameBtn = document.getElementById('restart-game-btn');
+        const progressBar = document.getElementById('progress-bar');
+        const timerBar = document.getElementById('timer-bar');
+        const timerDisplay = document.getElementById('timer-display');
+        const fiftyFiftyBtn = document.getElementById('fifty-fifty-btn');
+        const fiftyFiftyCountDisplay = document.getElementById('fifty-fifty-count');
+        const callExpertBtn = document.getElementById('call-expert-btn');
+        const expertCountDisplay = document.getElementById('expert-count');
+        const askAudienceBtn = document.getElementById('ask-audience-btn');
+        const audienceCountDisplay = document.getElementById('audience-count');
+        const geminiExplanationBtn = document.getElementById('gemini-explanation-btn');
+        const generateNewQuestionBtn = document.getElementById('generate-new-question-btn');
+        const scenarioSimulatorBtn = document.getElementById('scenario-simulator-btn');
+        const learningPathBtn = document.getElementById('learning-path-btn');
+        const cyberAdvisorBtn = document.getElementById('cyber-advisor-btn');
+
+        const customModal = document.getElementById('custom-modal');
+        const modalHeader = document.getElementById('modal-header');
+        const modalBody = document.getElementById('modal-body');
+        const modalLoading = document.getElementById('modal-loading');
+        const modalCloseBtn = document.getElementById('modal-close-btn');
+
+        const advisorModal = document.getElementById('advisor-modal');
+        const advisorQuestionInput = document.getElementById('advisor-question-input');
+        const askAdvisorBtn = document.getElementById('ask-advisor-btn');
+        const advisorResponseArea = document.getElementById('advisor-response-area');
+        const advisorLoading = document.getElementById('advisor-loading');
+        const advisorCloseBtn = document.getElementById('advisor-close-btn');
+
+        // Variables del juego
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let lives = 3;
+        let fiftyFiftyUsed = false;
+        let expertUsed = false;
+        let audienceUsed = false;
+        let timer = 30;
+        let timerInterval;
+        let sirenInterval;
+        let shuffledQuestions = [];
+        let audioContext;
+        let oscillator;
+        let gainNode;
+        let speechSynth = window.speechSynthesis;
+        let currentUtterance = null;
+
+        // Initialize AudioContext
+        function initAudio() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Play continuous siren sound using Web Audio API
+        function playSirenSound() {
+            initAudio();
+            if (oscillator) { // Stop previous siren if it's still playing
+                oscillator.stop();
+                oscillator.disconnect();
+                gainNode.disconnect();
+            }
+
+            oscillator = audioContext.createOscillator();
+            gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.type = 'sine';
+
+            const now = audioContext.currentTime;
+
+            // Define a repeating siren pattern
+            function createSirenPattern(start_time) {
+                oscillator.frequency.setValueAtTime(440, start_time);
+                gainNode.gain.setValueAtTime(0.5, start_time);
+
+                oscillator.frequency.linearRampToValueAtTime(880, start_time + 0.25);
+                oscillator.frequency.linearRampToValueAtTime(440, start_time + 0.5);
+                oscillator.frequency.linearRampToValueAtTime(880, start_time + 0.75);
+                oscillator.frequency.linearRampToValueAtTime(440, start_time + 1.0);
+            }
+
+            // Start the first pattern
+            createSirenPattern(now);
+
+            // Schedule repeating patterns to cover the 10 seconds
+            for (let i = 1; i < 10; i++) {
+                createSirenPattern(now + i);
+            }
+
+            oscillator.start(now);
+            // The siren will be stopped explicitly when timer hits 0 or answer is selected
+        }
+
+        // Stop siren sound
+        function stopSirenSound() {
+            if (oscillator) {
+                oscillator.stop();
+                oscillator.disconnect();
+                gainNode.disconnect();
+                oscillator = null;
+                gainNode = null;
+            }
+        }
+
+        // Text-to-Speech function
+        function speakText(text) {
+            if (!speechSynth) {
+                console.warn("SpeechSynthesis not supported in this browser.");
+                return;
+            }
+            if (currentUtterance && speechSynth.speaking) {
+                speechSynth.cancel(); // Stop current speech if any
+            }
+            currentUtterance = new SpeechSynthesisUtterance(text);
+            currentUtterance.lang = 'es-ES'; // Set language to Spanish
+            speechSynth.speak(currentUtterance);
+        }
+
+        // Function to show custom modal
+        function showModal(title, message, callback = null, isLoading = false) {
+            stopSirenSound(); // Stop siren if modal appears
+            speakText(`${title}. ${message}`); // Speak modal content
+
+            modalHeader.textContent = title;
+            modalBody.innerHTML = message;
+            if (isLoading) {
+                modalLoading.classList.remove('hidden');
+                modalBody.classList.add('hidden');
+            } else {
+                modalLoading.classList.add('hidden');
+                modalBody.classList.remove('hidden');
+            }
+            customModal.classList.remove('hidden');
+            // Disable all interactive elements behind the modal
+            document.querySelectorAll('.game-container button').forEach(btn => btn.disabled = true);
+
+            modalCloseBtn.onclick = () => {
+                speechSynth.cancel(); // Stop speech when modal is closed
+                customModal.classList.add('hidden');
+                // Re-enable interactive elements when modal is closed
+                document.querySelectorAll('.game-container button').forEach(btn => btn.disabled = false);
+                // Re-disable options if an answer was already selected
+                if (nextQuestionBtn.classList.contains('hidden')) {
+                    document.querySelectorAll('.btn-option').forEach(btn => btn.disabled = false);
+                } else {
+                    document.querySelectorAll('.btn-option').forEach(btn => btn.disabled = true);
+                }
+                if (callback) callback();
+            };
+        }
+
+        // Function to shuffle array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Start game
+        startGameBtn.addEventListener('click', () => {
+            welcomeScreen.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            resetGame();
+            shuffledQuestions = shuffleArray([...questions]);
+            totalQuestionsDisplay.textContent = shuffledQuestions.length;
+            displayQuestion();
+        });
+
+        // Restart game
+        restartGameBtn.addEventListener('click', () => {
+            endScreen.classList.add('hidden');
+            welcomeScreen.classList.remove('hidden');
+        });
+
+        // Reset game state
+        function resetGame() {
+            currentQuestionIndex = 0;
+            score = 0;
+            lives = 3;
+            fiftyFiftyUsed = false;
+            expertUsed = false;
+            audienceUsed = false;
+            scoreDisplay.textContent = score;
+            livesDisplay.textContent = lives;
+            fiftyFiftyCountDisplay.textContent = 1;
+            expertCountDisplay.textContent = 1;
+            audienceCountDisplay.textContent = 1;
+            fiftyFiftyBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+            callExpertBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+            askAudienceBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+            nextQuestionBtn.classList.add('hidden');
+            feedbackArea.classList.add('hidden');
+            geminiExplanationBtn.classList.add('hidden');
+            updateProgressBar();
+            stopTimer();
+            speechSynth.cancel(); // Stop any speech on reset
+        }
+
+        // Display current question
+        function displayQuestion() {
+            stopTimer();
+            stopSirenSound();
+            speechSynth.cancel(); // Stop current speech before new question
+            timer = 30;
+            timerBar.style.width = '100%';
+            timerBar.classList.remove('siren-effect');
+            timerDisplay.textContent = timer;
+            startTimer();
+
+            feedbackArea.classList.add('hidden');
+            nextQuestionBtn.classList.add('hidden');
+            geminiExplanationBtn.classList.add('hidden');
+            optionsContainer.innerHTML = '';
+
+            if (currentQuestionIndex >= shuffledQuestions.length) {
+                endGame();
+                return;
+            }
+
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            questionText.textContent = questionData.question;
+            speakText(questionData.question); // Speak the question
+            currentQuestionNumberDisplay.textContent = currentQuestionIndex + 1;
+
+            questionData.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.classList.add('btn', 'btn-option');
+                button.textContent = option;
+                button.dataset.index = index;
+                button.addEventListener('click', () => selectAnswer(button, index));
+                optionsContainer.appendChild(button);
+            });
+
+            document.querySelectorAll('.btn-option').forEach(btn => {
+                btn.classList.remove('selected', 'correct', 'incorrect', 'disabled');
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            });
+            if (!fiftyFiftyUsed) fiftyFiftyBtn.disabled = false;
+            if (!expertUsed) callExpertBtn.disabled = false;
+            if (!audienceUsed) askAudienceBtn.disabled = false;
+
+            updateProgressBar();
+        }
+
+        // Select and verify answer
+        function selectAnswer(selectedButton, selectedIndex) {
+            stopTimer();
+            stopSirenSound();
+            speechSynth.cancel(); // Stop speech when answer is selected
+
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            const isCorrect = (selectedIndex === questionData.correctAnswerIndex);
+
+            document.querySelectorAll('.btn-option').forEach(btn => {
+                btn.disabled = true;
+                btn.classList.add('disabled');
+            });
+            fiftyFiftyBtn.disabled = true;
+            callExpertBtn.disabled = true;
+            askAudienceBtn.disabled = true;
+
+            if (isCorrect) {
+                score += 10;
+                scoreDisplay.textContent = score;
+                selectedButton.classList.add('correct');
+                showFeedback(true, questionData.explanation);
+                speakText(`Correcto. ${questionData.explanation}`); // Speak correct feedback
+            } else {
+                lives--;
+                livesDisplay.textContent = lives;
+                selectedButton.classList.add('incorrect');
+                optionsContainer.children[questionData.correctAnswerIndex].classList.add('correct');
+                showFeedback(false, questionData.explanation);
+                speakText(`Incorrecto. ${questionData.explanation}`); // Speak incorrect feedback
+            }
+
+            nextQuestionBtn.classList.remove('hidden');
+            geminiExplanationBtn.classList.remove('hidden');
+            nextQuestionBtn.onclick = () => {
+                currentQuestionIndex++;
+                displayQuestion();
+            };
+
+            if (lives <= 0) {
+                showModal('¡Fin del Juego!', 'Te has quedado sin vidas. ¡Sigue aprendiendo para mejorar!', endGame);
+            }
+        }
+
+        // Show feedback
+        function showFeedback(isCorrect, explanation) {
+            feedbackArea.classList.remove('hidden');
+            feedbackArea.classList.remove('feedback-correct', 'feedback-incorrect');
+            if (isCorrect) {
+                feedbackArea.classList.add('feedback-correct');
+                feedbackArea.innerHTML = `<strong>¡Correcto!</strong><br>${explanation}`;
+            } else {
+                feedbackArea.classList.add('feedback-incorrect');
+                feedbackArea.innerHTML = `<strong>¡Incorrecto!</strong><br>${explanation}`;
+            }
+        }
+
+        // Update progress bar
+        function updateProgressBar() {
+            const progress = (currentQuestionIndex / shuffledQuestions.length) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+
+        // End game
+        function endGame() {
+            stopTimer();
+            stopSirenSound();
+            speechSynth.cancel(); // Stop speech at end of game
+            gameScreen.classList.add('hidden');
+            endScreen.classList.remove('hidden');
+            finalScoreDisplay.textContent = score;
+
+            let message = '';
+            if (score === shuffledQuestions.length * 10) {
+                message = "¡Felicidades, eres un verdadero Maestro de la Ciberseguridad! ¡Excelente trabajo!";
+            } else if (score >= (shuffledQuestions.length * 10) / 2) {
+                message = "¡Buen esfuerzo! Has demostrado un buen conocimiento en ciberseguridad. ¡Sigue practicando!";
+            } else {
+                message = "Has completado el juego. ¡Sigue aprendiendo sobre ciberseguridad para protegerte mejor!";
+            }
+            endMessageDisplay.textContent = message;
+            speakText(`Juego Terminado. Tu puntuación final es ${score}. ${message}`); // Speak end game message
+        }
+
+        // Timer logic
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                timer--;
+                timerDisplay.textContent = timer;
+                timerBar.style.width = `${(timer / 30) * 100}%`;
+
+                if (timer === 10) {
+                    playSirenSound();
+                }
+                if (timer <= 10 && timer > 0) {
+                    if (!timerBar.classList.contains('siren-effect')) {
+                        timerBar.classList.add('siren-effect');
+                    }
+                } else {
+                    timerBar.classList.remove('siren-effect');
+                }
+
+                if (timer <= 0) {
+                    stopTimer();
+                    stopSirenSound();
+                    speechSynth.cancel(); // Stop speech when timer hits 0
+                    showModal('¡Tiempo Agotado!', 'No seleccionaste una respuesta a tiempo.', () => {
+                        lives--;
+                        livesDisplay.textContent = lives;
+                        if (lives <= 0) {
+                            showModal('¡Fin del Juego!', 'Te has quedado sin vidas. ¡Sigue aprendiendo para mejorar!', endGame);
+                        } else {
+                            currentQuestionIndex++;
+                            displayQuestion();
+                        }
+                    });
+                }
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerBar.classList.remove('siren-effect');
+        }
+
+        // Lifeline 50/50
+        fiftyFiftyBtn.addEventListener('click', () => {
+            if (fiftyFiftyUsed || currentQuestionIndex >= shuffledQuestions.length) {
+                return;
+            }
+
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            const options = Array.from(optionsContainer.children);
+            const incorrectOptions = options.filter(
+                (btn, index) => index !== questionData.correctAnswerIndex
+            );
+
+            const shuffledIncorrect = shuffleArray([...incorrectOptions]);
+
+            for (let i = 0; i < 2 && i < shuffledIncorrect.length; i++) {
+                shuffledIncorrect[i].classList.add('disabled');
+                shuffledIncorrect[i].disabled = true;
+                shuffledIncorrect[i].style.opacity = '0.3';
+            }
+
+            fiftyFiftyUsed = true;
+            fiftyFiftyCountDisplay.textContent = 0;
+            fiftyFiftyBtn.classList.add('opacity-60', 'cursor-not-allowed');
+            fiftyFiftyBtn.disabled = true;
+        });
+
+        // Gemini API Integration - Extended Explanation
+        geminiExplanationBtn.addEventListener('click', async () => {
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            const prompt = `Proporciona una explicación más detallada y extensa sobre el siguiente concepto de ciberseguridad. La pregunta fue: "${questionData.question}". La respuesta correcta fue: "${questionData.options[questionData.correctAnswerIndex]}". La explicación breve fue: "${questionData.explanation}". Extiende esta explicación para que sea más educativa y completa.`;
+
+            showModal('Cargando Explicación ✨', 'Generando explicación extendida con Gemini...', null, true);
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    showModal('Explicación Extendida ✨', text, null, false);
+                } else {
+                    showModal('Error', 'No se pudo obtener la explicación extendida. Inténtalo de nuevo.', null, false);
+                }
+            } catch (error) {
+                console.error('Error fetching extended explanation:', error);
+                showModal('Error', 'Hubo un problema al conectar con Gemini. Por favor, inténtalo más tarde.', null, false);
+            }
+        });
+
+        // Lifeline: Call an Expert
+        callExpertBtn.addEventListener('click', async () => {
+            if (expertUsed || currentQuestionIndex >= shuffledQuestions.length) {
+                return;
+            }
+
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            const prompt = `Actúa como un experto en ciberseguridad. Proporciona un consejo o pista útil para la siguiente pregunta, sin revelar la respuesta directamente. La pregunta es: "${questionData.question}". Las opciones son: ${JSON.stringify(questionData.options)}.`;
+
+            showModal('Llamando a un Experto ✨', 'Conectando con el experto en ciberseguridad...', null, true);
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    showModal('Consejo del Experto ✨', text, null, false);
+                    expertUsed = true;
+                    expertCountDisplay.textContent = 0;
+                    callExpertBtn.classList.add('opacity-60', 'cursor-not-allowed');
+                    callExpertBtn.disabled = true;
+                } else {
+                    showModal('Error', 'El experto no pudo proporcionar una pista. Inténtalo de nuevo.', null, false);
+                }
+            } catch (error) {
+                console.error('Error fetching expert advice:', error);
+                showModal('Error', 'Hubo un problema al conectar con el experto. Por favor, inténtalo más tarde.', null, false);
+            }
+        });
+
+        // Lifeline: Ask the Audience
+        askAudienceBtn.addEventListener('click', () => {
+            if (audienceUsed || currentQuestionIndex >= shuffledQuestions.length) {
+                return;
+            }
+
+            const questionData = shuffledQuestions[currentQuestionIndex];
+            const options = Array.from(optionsContainer.children);
+
+            let percentages = new Array(options.length).fill(0);
+            let remainingPercentage = 100;
+
+            // Assign a high percentage to the correct answer (60-80%)
+            const correctPercentage = Math.floor(Math.random() * 21) + 60; // 60-80
+            percentages[questionData.correctAnswerIndex] = correctPercentage;
+            remainingPercentage -= correctPercentage;
+
+            // Distribute remaining percentage among incorrect answers
+            let incorrectIndices = [];
+            for (let i = 0; i < options.length; i++) {
+                if (i !== questionData.correctAnswerIndex) {
+                    incorrectIndices.push(i);
+                }
+            }
+
+            // Shuffle incorrect indices to randomize distribution
+            incorrectIndices = shuffleArray(incorrectIndices);
+
+            for (let i = 0; i < incorrectIndices.length; i++) {
+                const currentOptionIndex = incorrectIndices[i];
+                let allocation = 0;
+                if (i === incorrectIndices.length - 1) { // Last incorrect option gets remaining
+                    allocation = remainingPercentage;
+                } else {
+                    allocation = Math.floor(Math.random() * (remainingPercentage + 1));
+                }
+                percentages[currentOptionIndex] += allocation;
+                remainingPercentage -= allocation;
+            }
+
+            // Final adjustment to ensure sum is 100 (due to flooring)
+            let sum = percentages.reduce((a, b) => a + b, 0);
+            if (sum !== 100) {
+                percentages[questionData.correctAnswerIndex] += (100 - sum);
+            }
+
+            let modalContent = `<p class="mb-4">El público ha votado:</p>`;
+            options.forEach((option, index) => {
+                modalContent += `<p class="mb-1">${option.textContent}: <span class="font-bold">${percentages[index]}%</span></p>`;
+            });
+
+            showModal('Preguntar al Público ✨', modalContent, null, false);
+
+            audienceUsed = true;
+            audienceCountDisplay.textContent = 0;
+            askAudienceBtn.classList.add('opacity-60', 'cursor-not-allowed');
+            askAudienceBtn.disabled = true;
+        });
+
+
+        // Gemini API Integration - Generate New Question
+        generateNewQuestionBtn.addEventListener('click', async () => {
+            const prompt = `Genera una nueva pregunta de trivial sobre concientización en ciberseguridad para usuarios finales. Incluye 4 opciones de respuesta, el índice de la respuesta correcta (0-3) y una explicación concisa de por qué esa es la respuesta correcta. La pregunta debe ser sencilla y fácil de entender, evitando la jerga técnica compleja. Devuelve la respuesta en formato JSON con las siguientes propiedades: "question" (string), "options" (array of strings), "correctAnswerIndex" (number), "explanation" (string).`;
+
+            showModal('Cargando Nueva Pregunta ✨', 'Generando una pregunta original con Gemini...', null, true);
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = {
+                    contents: chatHistory,
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "question": { "type": "STRING" },
+                                "options": {
+                                    "type": "ARRAY",
+                                    "items": { "type": "STRING" }
+                                },
+                                "correctAnswerIndex": { "type": "NUMBER" },
+                                "explanation": { "type": "STRING" }
+                            },
+                            "required": ["question", "options", "correctAnswerIndex", "explanation"]
+                        }
+                    }
+                };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const jsonString = result.candidates[0].content.parts[0].text;
+                    const newQuestion = JSON.parse(jsonString);
+
+                    let modalContent = `
+                        <p class="font-bold text-lg mb-2">${newQuestion.question}</p>
+                        <ul class="list-disc list-inside mb-4">
+                    `;
+                    newQuestion.options.forEach((opt, idx) => {
+                        modalContent += `<li>${opt}</li>`;
+                    });
+                    modalContent += `</ul>
+                        <p class="font-bold mb-1">Respuesta Correcta:</p>
+                        <p class="mb-4">${newQuestion.options[newQuestion.correctAnswerIndex]}</p>
+                        <p class="font-bold mb-1">Explicación:</p>
+                        <p>${newQuestion.explanation}</p>
+                    `;
+
+                    showModal('Nueva Pregunta Generada ✨', modalContent, null, false);
+                } else {
+                    showModal('Error', 'No se pudo generar una nueva pregunta. Inténtalo de nuevo.', null, false);
+                }
+            } catch (error) {
+                console.error('Error generating new question:', error);
+                showModal('Error', 'Hubo un problema al conectar con Gemini. Por favor, inténtalo más tarde.', null, false);
+            }
+        });
+
+        // Gemini API Integration - Scenario Simulator
+        scenarioSimulatorBtn.addEventListener('click', async () => {
+            const prompt = `Genera un escenario de ciberseguridad común y realista para un usuario final, y luego describe la acción recomendada que el usuario debería tomar. El escenario debe ser conciso y la acción recomendada clara y práctica. Devuelve la respuesta en formato JSON con las siguientes propiedades: "scenarioDescription" (string), "recommendedAction" (string).`;
+
+            showModal('Cargando Escenario ✨', 'Generando un escenario de ciberseguridad con Gemini...', null, true);
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = {
+                    contents: chatHistory,
+                    generationConfig: {
+                        responseMimeType: "application/json",
+                        responseSchema: {
+                            type: "OBJECT",
+                            properties: {
+                                "scenarioDescription": { "type": "STRING" },
+                                "recommendedAction": { "type": "STRING" }
+                            },
+                            "required": ["scenarioDescription", "recommendedAction"]
+                        }
+                    }
+                };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const jsonString = result.candidates[0].content.parts[0].text;
+                    const scenario = JSON.parse(jsonString);
+
+                    let modalContent = `
+                        <p class="font-bold text-lg mb-2">Escenario:</p>
+                        <p class="mb-4">${scenario.scenarioDescription}</p>
+                        <p class="font-bold mb-1">Acción Recomendada:</p>
+                        <p>${scenario.recommendedAction}</p>
+                    `;
+
+                    showModal('Simulador de Escenario ✨', modalContent, null, false);
+                } else {
+                    showModal('Error', 'No se pudo generar el escenario. Inténtalo de nuevo.', null, false);
+                }
+            } catch (error) {
+                console.error('Error generating scenario:', error);
+                showModal('Error', 'Hubo un problema al conectar con Gemini. Por favor, inténtalo más tarde.', null, false);
+            }
+        });
+
+        // Gemini API Integration - Personalized Learning Path Suggestion
+        learningPathBtn.addEventListener('click', async () => {
+            const maxScore = shuffledQuestions.length * 10;
+            const percentageCorrect = (score / maxScore) * 100;
+
+            let performanceFeedback = "";
+            if (percentageCorrect >= 80) {
+                performanceFeedback = "Tu rendimiento fue excelente, demostrando un sólido conocimiento en ciberseguridad.";
+            } else if (percentageCorrect >= 50) {
+                performanceFeedback = "Tu rendimiento fue bueno, con áreas de mejora.";
+            } else {
+                performanceFeedback = "Tu rendimiento indica que hay muchas oportunidades para aprender más sobre ciberseguridad.";
+            }
+
+            const prompt = `Basado en el siguiente rendimiento en un juego de ciberseguridad: Puntuación final: ${score} de ${maxScore} (${percentageCorrect.toFixed(2)}% de aciertos). Vidas restantes: ${lives}. ${performanceFeedback} Sugiere una ruta de aprendizaje personalizada en ciberseguridad para un usuario final. Incluye 3-5 temas clave en los que debería enfocarse y por qué son importantes. También sugiere un tipo de recurso (ej. videos cortos, artículos, simulacros) para cada tema. Presenta la información de forma clara y concisa.`;
+
+            showModal('Cargando Ruta de Aprendizaje ✨', 'Generando tu ruta de aprendizaje personalizada con Gemini...', null, true);
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    showModal('Tu Ruta de Aprendizaje ✨', text, null, false);
+                } else {
+                    showModal('Error', 'No se pudo generar la ruta de aprendizaje. Inténtalo de nuevo.', null, false);
+                }
+            } catch (error) {
+                console.error('Error fetching learning path:', error);
+                showModal('Error', 'Hubo un problema al conectar con Gemini. Por favor, inténtalo más tarde.', null, false);
+            }
+        });
+
+        // Gemini API Integration - Cyber Advisor
+        cyberAdvisorBtn.addEventListener('click', () => {
+            advisorModal.classList.remove('hidden');
+            advisorQuestionInput.value = '';
+            advisorResponseArea.classList.add('hidden');
+            advisorLoading.classList.add('hidden');
+            // Disable all interactive elements behind the modal
+            document.querySelectorAll('.game-container button').forEach(btn => btn.disabled = true);
+
+            advisorCloseBtn.onclick = () => {
+                advisorModal.classList.add('hidden');
+                // Re-enable interactive elements when modal is closed
+                document.querySelectorAll('.game-container button').forEach(btn => btn.disabled = false);
+            };
+        });
+
+        askAdvisorBtn.addEventListener('click', async () => {
+            const userQuestion = advisorQuestionInput.value.trim();
+            if (!userQuestion) {
+                showModal('Pregunta Vacía', 'Por favor, escribe tu pregunta para el Asesor de Ciberseguridad.', null, false);
+                return;
+            }
+
+            advisorResponseArea.classList.add('hidden');
+            advisorLoading.classList.remove('hidden');
+
+            const prompt = `Actúa como un asesor de ciberseguridad. Responde a la siguiente pregunta de forma concisa y clara, adecuada para un usuario final. Pregunta: "${userQuestion}"`;
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = "";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                advisorLoading.classList.add('hidden');
+                advisorResponseArea.classList.remove('hidden');
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    advisorResponseArea.textContent = text;
+                    speakText(text); // Speak advisor response
+                } else {
+                    advisorResponseArea.textContent = 'No se pudo obtener una respuesta. Inténtalo de nuevo.';
+                }
+            } catch (error) {
+                console.error('Error fetching advisor response:', error);
+                advisorLoading.classList.add('hidden');
+                advisorResponseArea.classList.remove('hidden');
+                advisorResponseArea.textContent = 'Hubo un problema al conectar con Gemini. Por favor, inténtalo más tarde.';
+            }
+        });
+
+
+        // Initialize total questions display on load (before game starts)
+        totalQuestionsDisplay.textContent = questions.length;
+    </script>
+</body>
+</html>
